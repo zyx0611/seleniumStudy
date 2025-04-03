@@ -1,10 +1,14 @@
 import json
 
+from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 from selenium import webdriver
 import time
+
+from selenium.webdriver.support.wait import WebDriverWait
 
 edge = webdriver.Edge()
 
@@ -23,20 +27,71 @@ handle = edge.window_handles
 
 edge.switch_to.window(handle[-1])
 
-infoButton = edge.find_element(By.XPATH, "//span[text()='200账号详情']")
 
+wait = WebDriverWait(edge, 10)
+infoButton = wait.until(
+    EC.element_to_be_clickable((By.XPATH, "//span[text()='200账号详情']"))
+    # edge.find_element(By.XPATH, "//span[text()='200账号详情']")
+)
 # infoButton.click()
 ActionChains(edge).move_to_element(infoButton).click(infoButton).perform()
 
 edge.switch_to.default_content()
 
-time.sleep(5)
+# tbody = WebDriverWait(edge, 100).until(
+#     EC.element_to_be_clickable((By.TAG_NAME, 'tbody'))
+# )
+# print('tbody')
+#
+#
+# tr = WebDriverWait(edge, 100).until(
+#     EC.element_to_be_clickable((By.TAG_NAME, 'tr'))
+# )
+# print('tr')
+#
+# td = WebDriverWait(edge, 100).until(
+#     EC.element_to_be_clickable((By.TAG_NAME, 'td'))
+# )
+# print('td')
 
-table = edge.find_element(By.TAG_NAME, 'table')
-# table = edge.find_element(By.ID, 'result_list')
-tr = table.find_element(By.TAG_NAME, 'tr')
+iframe = edge.find_element(By.TAG_NAME, "iframe")
+edge.switch_to.frame(iframe)
 
-print(json.dumps(tr.text))
+page = edge.find_element(By.CLASS_NAME, 'el-pager')
+
+print(page)
+pageNumber = len(list(page.text))
+current_page = 1
+edge.switch_to.default_content()
+
+while current_page <= pageNumber:
+    iframe = edge.find_element(By.TAG_NAME, "iframe")
+    edge.switch_to.frame(iframe)
+    table = edge.find_element(By.TAG_NAME, 'table')
+    header_row = table.find_element(By.TAG_NAME, 'tr')
+
+
+    # 3. 提取表头文本
+    header_texts = [th.text.strip() for th in header_row.text]
+
+    print("表头:", header_texts)
+
+    # rows = table.find_elements(By.TAG_NAME, "tr")  # 获取所有行
+    # for row in rows:
+    #     cols = row.find_elements(By.TAG_NAME, "td")  # 获取单元格
+    #     for col in cols:
+    #         print(col.text)
+
+    try:
+        next_button = edge.find_element(By.CLASS_NAME, 'btn-next')
+        next_button.click()
+        time.sleep(3)
+        current_page += 1
+        # 返回主文档
+        edge.switch_to.default_content()
+    except NoSuchElementException:
+        print("没有更多页面了")
+        break
 
 # with open("data.txt", 'w', encoding='utf-8') as f:
     # for i in tr:
