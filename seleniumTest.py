@@ -4,6 +4,8 @@ from selenium.webdriver import Keys
 
 from selenium.webdriver.common.action_chains import ActionChains
 
+import undetected_edgedriver as ue
+
 import time
 
 # 指定EdgeDriver的路径
@@ -11,6 +13,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
+
+edge = ue.Edge()
+edgeDemo = edge.get('https://www.baidu.com')
 
 edge_driver_path = 'E:\新建文件夹\edgedriver_win64.zip'  # 请替换为你的EdgeDriver实际路径
 
